@@ -25,18 +25,29 @@ public class Main
 
 
         // Creates an array to hold the coefficients.
-        float[][] coefficients = new float[numberOfEquations][numberOfEquations];
+        float[][] coefficients;
+        float[][] originalCoefficients = new float [numberOfEquations][numberOfEquations];
+        float[] rightHandSide = new float[numberOfEquations];
+        float[] results = new float[numberOfEquations];
 
-        getCoefficients(coefficients, coefficientsOption, numberOfEquations);
 
-        printCoefficients(coefficients, numberOfEquations);
+        getCoefficients(originalCoefficients, rightHandSide, coefficientsOption, numberOfEquations);
+
+        // Saves the original array.
+        coefficients = originalCoefficients.clone();
 
 
-        System.out.print("X" + generateSubscript(1));
+        GaussianElimination.getInstance().scaledPartialPivoting(numberOfEquations,
+                coefficients, rightHandSide, results);
 
-	}
+        System.out.println("\n");
+        for(int i = 0; i < numberOfEquations; i++)
+        {
+            System.out.println(results[i]);
+        }
+    }
 
-	public static void getCoefficients(float[][] coefficients, int coefficientsOption,
+	public static void getCoefficients(float[][] coefficients, float[] rightHandSide,  int coefficientsOption,
                                        int numberOfEquations)
     {
         switch (coefficientsOption)
@@ -45,28 +56,44 @@ public class Main
                 for(int i = 0; i < numberOfEquations; i++)
                 {
                     System.out.println("\nEquation #" + (i + 1) + ": ");
-                    for(int j = 0; j < numberOfEquations; j++)
+                    for(int j = 0; j < numberOfEquations + 1; j++)
                     {
-                        System.out.print("\tC" + (j + 1) + " = ");
-                        coefficients[i][j] = scanner.nextFloat();
+                        if(j < numberOfEquations)
+                        {
+                            System.out.print("\tC" + (j + 1) + " = ");
+                            coefficients[i][j] = scanner.nextFloat();
+                        }
+                        else
+                        {
+                            System.out.print("\tRH = ");
+                            rightHandSide[i] = scanner.nextFloat();
+                        }
                     }
                 }
                 break;
             case 2:
+                FileHandler.getInstance().readFile(coefficients, rightHandSide, "coefficients");
                 break;
             default:
         }
-
     }
 
-    public static void printCoefficients(float[][] coefficients, int numberOfEquations)
+    public static void printEquations(float[][] coefficients, float[] rightHandSide, int numberOfEquations)
     {
         for(int i = 0; i < numberOfEquations; i++)
         {
-            System.out.println("\nEquation #" + (i + 1) + ": ");
-            for(int j = 0; j < numberOfEquations; j++)
+            System.out.println("\t");
+            for(int j = 0; j < numberOfEquations + 1; j++)
             {
-                System.out.print("\tC" + (j + 1) + " = " + coefficients[i][j]);
+                if(j < numberOfEquations)
+                {
+                    if(coefficients[i][j] >= 0 && j > 0)
+                        System.out.print("+");
+
+                    System.out.print(coefficients[i][j] + "X" + generateSubscript(j + 1));
+                }
+                else if(j == numberOfEquations)
+                    System.out.print("=" + rightHandSide[i]);
             }
         }
     }

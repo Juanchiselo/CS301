@@ -26,11 +26,11 @@ public class Main extends Application
 		stage = primaryStage;
 		stage.getIcons().add(new Image(Main.class.getResourceAsStream("Drawable/Icon.png")));
 		stage.setTitle("CS 301 Projects");
-		stage.setResizable(false);
+		stage.setResizable(true);
 		stage.setScene(mainWindow);
 		stage.show();
 	}
-	
+
 	public static void main(String[] args)
 	{
 		launch(args);

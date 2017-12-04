@@ -31,8 +31,8 @@ public class DynamicNode
         }
         catch(Exception exception)
         {
-            Main.mainWindowController.setStatus("ERROR",
-                    exception.getMessage());
+//            Main.mainWindowController.setStatus("ERROR",
+//                    exception.getMessage());
         }
 
 

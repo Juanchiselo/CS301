@@ -1,6 +1,8 @@
 import javafx.collections.ObservableList;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -52,8 +54,7 @@ public class FileHandler
         }
     }
 
-
-    public void readFile(File file, ObservableList<InterpolationNode> data)
+    public void readFile(File file, ArrayList<ArrayList<Float>> table)
     {
         this.fileName = file.getAbsolutePath();
         openFile();
@@ -61,6 +62,8 @@ public class FileHandler
         int lineCounter = 0;
         String[] xValues = null;
         String[] yValues = null;
+        ArrayList<Float> xs = new ArrayList<>();
+        ArrayList<Float> ys = new ArrayList<>();
 
         try
         {
@@ -80,23 +83,12 @@ public class FileHandler
 
             for(int i = 0; i < xValues.length; i++)
             {
-//                DynamicNode dynamicNode = new DynamicNode();
-//                dynamicNode.setProperty("x", xValues[i]);
-//                dynamicNode.setProperty("y", yValues[i]);
-//
-//                dynamicNode.define("getX", new Callable<Object>()
-//                {
-//                    @Override
-//                    public Object call() throws Exception
-//                    {
-//                        return null;
-//                    }
-//                });
-
-                data.add(new InterpolationNode(Float.valueOf(xValues[i]),
-                        Float.valueOf(yValues[i])));
-                data.add(null);
+                xs.add(Float.valueOf(xValues[i]));
+                ys.add(Float.valueOf(yValues[i]));
             }
+
+            table.add(xs);
+            table.add(ys);
         }
         catch (IOException e)
         {
@@ -108,4 +100,63 @@ public class FileHandler
             closeFile();
         }
     }
+
+
+
+
+//    public void readFile(File file, ObservableList<InterpolationNode> data)
+//    {
+//        this.fileName = file.getAbsolutePath();
+//        openFile();
+//
+//        int lineCounter = 0;
+//        String[] xValues = null;
+//        String[] yValues = null;
+//
+//        try
+//        {
+//            while((line = bufferedReader.readLine()) != null)
+//            {
+//                if (line.matches("[0-9. ]+"))
+//                {
+//                    line = line.trim();
+//
+//                    if(lineCounter == 0)
+//                        xValues = line.split("[ ]");
+//                    else if(lineCounter == 1)
+//                        yValues = line.split("[ ]");
+//                }
+//                lineCounter++;
+//            }
+//
+//            for(int i = 0; i < xValues.length; i++)
+//            {
+////                DynamicNode dynamicNode = new DynamicNode();
+////                dynamicNode.setProperty("x", xValues[i]);
+////                dynamicNode.setProperty("y", yValues[i]);
+////
+////                dynamicNode.define("getX", new Callable<Object>()
+////                {
+////                    @Override
+////                    public Object call() throws Exception
+////                    {
+////                        return null;
+////                    }
+////                });
+//
+//                data.add(new InterpolationNode(Float.valueOf(xValues[i]),
+//                        Float.valueOf(yValues[i])));
+//                data.add(null);
+//            }
+//        }
+//        catch (IOException e)
+//        {
+//            Main.mainWindowController.setStatus("ERROR",
+//                    "Unable to read from file '" + fileName + "'.");
+//        }
+//        finally
+//        {
+//            closeFile();
+//        }
+//    }
 }

@@ -1,3 +1,5 @@
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
@@ -7,6 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 
 import java.io.File;
 import java.util.*;
@@ -14,10 +17,10 @@ import java.util.*;
 public class MainWindowController
 {
     // TableView
-    @FXML private TableView<InterpolationNode> dividedDifferenceTableView;
+    @FXML private TableView<DataRow> dividedDifferenceTableView;
     @FXML private TableColumn<String, String> xColumn;
     @FXML private TableColumn<String, String> yColumn;
-    private ObservableList<InterpolationNode> tableData = FXCollections.observableArrayList();
+    private ObservableList<DataRow> tableData = FXCollections.observableArrayList();
 
     // Tabs
     @FXML private TabPane mainWindowTabPane;
@@ -28,6 +31,9 @@ public class MainWindowController
     @FXML private ContextMenu songsContextMenu;
 
     @FXML private Label statusLabel;
+    @FXML private Label polynomialLabel;
+    @FXML private Label simplifiedPolynomial;
+    @FXML private Label lagrangeFormLabel;
 
     File file;
     FileChooser fileChooser = new FileChooser();
@@ -42,17 +48,9 @@ public class MainWindowController
                 new PropertyValueFactory<>("x"));
 
         yColumn.setCellValueFactory(
-                new PropertyValueFactory<>("y"));
+                new PropertyValueFactory<>("f0"));
 
         dividedDifferenceTableView.setSelectionModel(null);
-
-
-        // Right click context menu.
-        dividedDifferenceTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, t ->
-        {
-            if(t.getButton() == MouseButton.SECONDARY)
-                songsContextMenu.show(dividedDifferenceTableView, t.getScreenX() , t.getScreenY());
-        });
 
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Text File", "*.txt")
@@ -64,22 +62,6 @@ public class MainWindowController
     private void updateTable()
     {
         dividedDifferenceTableView.refresh();
-    }
-
-    /**
-     * The event handler for the Logout button in the MainWindow scene.
-     */
-    public void onLogout()
-    {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Logout");
-        alert.setHeaderText("Logout");
-        alert.setContentText("Are you sure you want to logout?");
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.OK)
-        {
-            Main.stage.setResizable(false);
-        }
     }
 
     /**NAVIGATION HANDLERS**/
@@ -105,10 +87,72 @@ public class MainWindowController
 
         if(file != null)
         {
-            FileHandler.getInstance().readFile(file, tableData);
-            dividedDifferenceTableView.setItems(tableData);
+            //FileHandler.getInstance().readFile(file, tableData);
+            //dividedDifferenceTableView.setItems(tableData);
 
-            int iterations = (tableData.size() / 2) - 1;
+            ArrayList<ArrayList<Float>> table = new ArrayList<>();
+            FileHandler.getInstance().readFile(file, table);
+
+
+
+            PolynomialInterpolation.getInstance().newton(table, 0);
+
+            String x, f0, f1, f2, f3;
+
+
+            int rows = table.get(0).size() * 2 - 1;
+
+            for(int row = 0; row < rows; row++)
+            {
+                x = f0 = f1 = f2 = f3 = "";
+                if(row == 0)
+                {
+                    x = String.valueOf(table.get(0).get(0));
+                    f0 = String.valueOf(table.get(1).get(0));
+                }
+                else if(row == 1)
+                {
+                    f1 = String.valueOf(table.get(2).get(0));
+                }
+                else if(row == 2)
+                {
+                    x = String.valueOf(table.get(0).get(1));
+                    f0 = String.valueOf(table.get(1).get(1));
+                    f2 = String.valueOf(table.get(3).get(0));
+                }
+                else if(row == 3)
+                {
+                    f1 = String.valueOf(table.get(2).get(1));
+                    f3 = String.valueOf(table.get(4).get(0));
+                }
+                else if(row == 4)
+                {
+                    x = String.valueOf(table.get(0).get(2));
+                    f0 = String.valueOf(table.get(1).get(2));
+                    f2 = String.valueOf(table.get(3).get(1));
+                }
+                else if(row == 5)
+                {
+                    f1 = String.valueOf(table.get(2).get(2));
+                }
+                else if(row == 6)
+                {
+                    x = String.valueOf(table.get(0).get(3));
+                    f0 = String.valueOf(table.get(1).get(3));
+                }
+
+                tableData.add(new DataRow(x, f0, f1, f2, f3));
+            }
+
+
+
+
+
+            //PolynomialInterpolation.getInstance().printDividedDifferenceTable(table);
+
+
+
+            int iterations = table.get(0).size() - 1;
 
             for(int i = 0; i < iterations; i++)
             {
@@ -117,14 +161,19 @@ public class MainWindowController
                     columnName += ",";
                 columnName += "]";
 
-
-
-                TableColumn<InterpolationNode, Float> column = new TableColumn<>();
+                TableColumn<DataRow, String> column = new TableColumn<>();
                 column.setSortable(false);
                 column.setText(columnName);
                 column.setMinWidth(100);
+                column.setCellValueFactory(
+                        new PropertyValueFactory<>("f" + (i + 1)));
                 dividedDifferenceTableView.getColumns().add(column);
             }
+
+            dividedDifferenceTableView.setItems(tableData);
+
+            polynomialLabel.setText(PolynomialInterpolation.getInstance().printInterpolatingPolynomial(table));
+            lagrangeFormLabel.setText(PolynomialInterpolation.getInstance().lagrange(table));
         }
     }
 
@@ -141,32 +190,5 @@ public class MainWindowController
             statusLabel.setStyle("-fx-text-fill: white");
 
         statusLabel.setText(type + ": " + message);
-    }
-
-    /**
-     * Displays error messages in the form of alerts.
-     * @param title - The title of the alert.
-     * @param errorMessage - The error message.
-     */
-    private void alertUser(String title, String errorMessage, String type)
-    {
-        Alert alert = new Alert(Alert.AlertType.NONE);
-
-        switch (type)
-        {
-            case "INFORMATION":
-                alert = new Alert(Alert.AlertType.INFORMATION);
-                break;
-            case "ERROR":
-                alert = new Alert(Alert.AlertType.ERROR);
-                break;
-            case "CONFIRMATION":
-                alert = new Alert(Alert.AlertType.CONFIRMATION);
-        }
-
-        alert.setTitle(title);
-        alert.setHeaderText(title);
-        alert.setContentText(errorMessage);
-        alert.showAndWait();
     }
 }

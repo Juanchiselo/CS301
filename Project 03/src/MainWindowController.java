@@ -89,7 +89,7 @@ public class MainWindowController
 
     public void onBisectionSelected()
     {
-        String equation = "A";
+        String equation;
         if(equations.getSelectedToggle().equals(equationARadioButton))
             equation = "A";
         else
@@ -142,7 +142,8 @@ public class MainWindowController
 
     public void onNewtonSelected()
     {
-        String equation = "A";
+        String equation;
+
         if(equations.getSelectedToggle().equals(equationARadioButton))
             equation = "A";
         else
@@ -168,7 +169,7 @@ public class MainWindowController
 
         TableColumn<RootRow, String> xnP1Column = new TableColumn<>();
         xnP1Column.setText("X(n+1)");
-        xnP1Column.setCellValueFactory(new PropertyValueFactory<>("fxnP1"));
+        xnP1Column.setCellValueFactory(new PropertyValueFactory<>("xnP1"));
 
         TableColumn<RootRow, String> aError = new TableColumn<>();
         aError.setText("Ea");
@@ -182,12 +183,58 @@ public class MainWindowController
             column.setMinWidth(100);
         }
 
-        rootsTableView.setItems(RootFinder.getInstance().Newton(equation, 1, 2, 100, 0.01));
+        rootsTableView.setItems(RootFinder.getInstance().Newton(equation, 3, 100, 0.01));
     }
 
     public void onSecantSelected()
     {
+        String equation;
+
+        if(equations.getSelectedToggle().equals(equationARadioButton))
+            equation = "A";
+        else
+            equation = "B";
+
         rootsTableView.getColumns().remove(0, rootsTableView.getColumns().size());
+
+        TableColumn<RootRow, String> nColumn = new TableColumn<>();
+        nColumn.setText("n");
+        nColumn.setCellValueFactory(new PropertyValueFactory<>("n"));
+
+        TableColumn<RootRow, String> xnM1Column = new TableColumn<>();
+        xnM1Column.setText("X(n-1)");
+        xnM1Column.setCellValueFactory(new PropertyValueFactory<>("xnM1"));
+
+        TableColumn<RootRow, String> xnColumn = new TableColumn<>();
+        xnColumn.setText("Xn");
+        xnColumn.setCellValueFactory(new PropertyValueFactory<>("xn"));
+
+        TableColumn<RootRow, String> xnP1Column = new TableColumn<>();
+        xnP1Column.setText("X(n+1)");
+        xnP1Column.setCellValueFactory(new PropertyValueFactory<>("xnP1"));
+
+        TableColumn<RootRow, String> fxnColumn = new TableColumn<>();
+        fxnColumn.setText("f(Xn)");
+        fxnColumn.setCellValueFactory(new PropertyValueFactory<>("fxn"));
+
+        TableColumn<RootRow, String> fxnM1Column = new TableColumn<>();
+        fxnM1Column.setText("f(X(n-1))");
+        fxnM1Column.setCellValueFactory(new PropertyValueFactory<>("fxnM1"));
+
+        TableColumn<RootRow, String> aError = new TableColumn<>();
+        aError.setText("Ea");
+        aError.setCellValueFactory(new PropertyValueFactory<>("approximateError"));
+
+        rootsTableView.getColumns().addAll(nColumn, xnM1Column, xnColumn, xnP1Column,
+                fxnColumn, fxnM1Column, aError);
+
+        for(TableColumn column : rootsTableView.getColumns())
+        {
+            column.setSortable(false);
+            column.setMinWidth(100);
+        }
+
+        rootsTableView.setItems(RootFinder.getInstance().Secant(equation, 0, 1, 100, 0.01));
     }
 
     public void onFalsePositionSelected()

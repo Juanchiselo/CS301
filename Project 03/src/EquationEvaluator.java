@@ -25,9 +25,21 @@ public class EquationEvaluator
                 + (17.7 * x) - 5;
     }
 
+    public double equationAP(double x)
+    {
+        // f'(x) = 6x^2 - 23.4x + 17.7
+        return (6 * Math.pow(x, 2)) - (23.4 * x) + 17.7;
+    }
+
     public double equationB(double x)
     {
         // f(x) = x + 10 - xcosh(50/x)
         return x + 10 - (x * Math.cosh(50 / x));
+    }
+
+    public double equationBP(double x)
+    {
+        // ((50sinh(50/x))/x) - cosh(50/x) + 1
+        return ((50 * Math.sinh(50 / x)) / x) - Math.cosh(50 / x) + 1;
     }
 }

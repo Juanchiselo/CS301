@@ -5,7 +5,6 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import java.io.IOException;
 
-
 public class Main extends Application
 {
 	public static MainWindowController mainWindowController;
